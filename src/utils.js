@@ -11,7 +11,7 @@ const checkForRequiredConfig = () => {
   if (!resideAgentData.email) {
     throw Error('Reside Agent Data must be set in src/utils.js (see README)');
   }
-}
+};
 
 /**
  * @description Setup docusign including default headers

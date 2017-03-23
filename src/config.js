@@ -1,13 +1,7 @@
-const {
-  DOCUSIGN_INTEGRATOR_KEY,
-  DOCUSIGN_EMAIL,
-  DOCUSIGN_PASSWORD,
-} = process.env;
-
 export const docusignConf = {
-  integratorKey: DOCUSIGN_INTEGRATOR_KEY || '',  // required
-  email: DOCUSIGN_EMAIL || '',  // required
-  password: DOCUSIGN_PASSWORD || '', // required
+  integratorKey: '',  // required
+  email: '',  // required
+  password: '', // required
   basePath: 'https://demo.docusign.net/restapi',
 };
 

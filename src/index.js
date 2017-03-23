@@ -4,6 +4,9 @@ import { each, get } from 'lodash';
 import { login } from './utils';
 import { contactsList, resideAgentData } from './config';
 
+
+const docWithoutDataUrl = 'https://storage.googleapis.com/top-agent-prue-dev.appspot.com/docusign-repro/Doc.pdf';
+const docWithDataUrl = 'https://storage.googleapis.com/top-agent-prue-dev.appspot.com/docusign-repro/DocWithData.pdf';
 const recipientIdMap = {
   agent: 1,
   client1: 2,
@@ -74,9 +77,6 @@ const createEnvelopeDef = () => {
   // Create a recipients object for the agent + transaction contacts
   const recipients = createRecipientsObject(contactsList, resideAgentData);
 
-  // Go through each document to collect data for the envelope
-  const pdfUrl = 'https://dl.dropboxusercontent.com/u/4241134/CAR%20PDFs%20v2/CARListAgmntExclusive.pdf';
-  const pdfName = 'Res Listing Agreement CAR';
   const inputs = [
     {
       recipientId: 'client1',
@@ -111,49 +111,63 @@ const createEnvelopeDef = () => {
       pageNumber: 5,
     },
   ];
-  const doc = new docusign.Document();
-  doc.setRemoteUrl(pdfUrl);
-  doc.setName(pdfName);
-  doc.setFileExtension('pdf');
-  doc.setDocumentId(1);
-  const initialVerticalOffset = -15;
+  const docOpts = [
+    {
+      pdfUrl: docWithoutDataUrl,
+      pdfName: 'working',
+    },
+    {
+      pdfUrl: docWithDataUrl,
+      pdfName: 'not working',
+    },
+  ];
+  const docs = [];
+  each(docOpts, (dOpt, i) => {
+    const doc = new docusign.Document();
+    doc.setRemoteUrl(dOpt.pdfUrl);
+    doc.setName(dOpt.pdfName);
+    doc.setFileExtension('pdf');
+    doc.setDocumentId(i + 1);
+    const initialVerticalOffset = -15;
 
-  // For each input, set to tabs object with correct config
-  each(inputs, (input) => {
-    switch (input.type) {
-      case 'signature': {
-        const signHere = new docusign.SignHere();
-        signHere.setRecipientId(recipientIdMap[input.recipientId]);
-        signHere.setXPosition(parseInt(input.left / 2, 10) - 3);
-        signHere.setYPosition(parseInt(input.top / 2, 10) + initialVerticalOffset);
-        signHere.setScaleValue(0.5);
+    // For each input, set to tabs object with correct config
+    each(inputs, (input) => {
+      switch (input.type) {
+        case 'signature': {
+          const signHere = new docusign.SignHere();
+          signHere.setRecipientId(recipientIdMap[input.recipientId]);
+          signHere.setXPosition(parseInt(input.left / 2, 10) - 3);
+          signHere.setYPosition(parseInt(input.top / 2, 10) + initialVerticalOffset);
+          signHere.setScaleValue(0.5);
 
-        signHere.setDocumentId(1);
-        signHere.setPageNumber(input.pageNumber);
+          signHere.setDocumentId(i + 1);
+          signHere.setPageNumber(input.pageNumber);
 
-        signHereTabs[input.recipientId] = signHereTabs[input.recipientId] || [];
-        signHereTabs[input.recipientId].push(signHere);
-        break;
+          signHereTabs[input.recipientId] = signHereTabs[input.recipientId] || [];
+          signHereTabs[input.recipientId].push(signHere);
+          break;
+        }
+        case 'initial': {
+          const initial = new docusign.InitialHere();
+          initial.setRecipientId(recipientIdMap[input.recipientId]);
+          initial.setXPosition(parseInt(input.left / 2, 10) - 3);
+          initial.setYPosition(parseInt(input.top / 2, 10) + initialVerticalOffset);
+          initial.setScaleValue(0.5);
+          initial.setDocumentId(i + 1);
+          initial.setPageNumber(input.pageNumber);
+
+          initialHereTabs[input.recipientId] = initialHereTabs[input.recipientId] || [];
+          initialHereTabs[input.recipientId].push(initial);
+          break;
+        }
+        default: {
+          console.log('Invalid input type');
+        }
       }
-      case 'initial': {
-        const initial = new docusign.InitialHere();
-        initial.setRecipientId(recipientIdMap[input.recipientId]);
-        initial.setXPosition(parseInt(input.left / 2, 10) - 3);
-        initial.setYPosition(parseInt(input.top / 2, 10) + initialVerticalOffset);
-        initial.setScaleValue(0.5);
-        initial.setDocumentId(1);
-        initial.setPageNumber(input.pageNumber);
-
-        initialHereTabs[input.recipientId] = initialHereTabs[input.recipientId] || [];
-        initialHereTabs[input.recipientId].push(initial);
-        break;
-      }
-      default: {
-        console.log('Invalid input type');
-      }
-    }
+    });
+    // push doc to docs list
+    docs.push(doc);
   });
-
 
   // Set all the tab types for all the clients
   // We'll need a each loop for all clients
@@ -168,7 +182,7 @@ const createEnvelopeDef = () => {
     envDef.getRecipients().getSigners().push(recipients[recipientKey]);
   });
 
-  envDef.setDocuments([doc, doc, doc]);
+  envDef.setDocuments(docs);
   return envDef;
 };
 
