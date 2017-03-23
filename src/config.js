@@ -15,7 +15,7 @@ export const contactsList = [
 
 export const resideAgentData = {
   email: '',  // required
-  displayName: 'Some Guy',
+  displayName: 'Somebody',
 };
 
 export default { docusignConf, contactsList, resideAgentData };
