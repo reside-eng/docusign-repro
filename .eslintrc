@@ -1,0 +1,30 @@
+root: true
+
+parser: babel-eslint
+
+extends: airbnb
+
+env:
+  es6: true
+  node: true
+
+ecmaFeatures:
+  modules: true
+
+rules:
+  import/no-unresolved: 2
+  consistent-return: 2
+  max-len: 0
+  no-else-return: 2
+  arrow-body-style: ['error', 'always']
+  react/sort-comp: 0
+  curly: "error"
+  no-use-before-define: 2
+  react/prefer-stateless-function: 0
+
+settings:
+  import/resolver:
+    node:
+      moduleDirectory:
+        - node_modules
+        - '/'
