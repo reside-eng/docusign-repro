@@ -13,7 +13,7 @@
 
 # The Problem: Signature/Initial Field Misalignment Error
 
-We have two visually identical PDFs, however, the initial field is placed in a different spot for both of them even though the documents appear the same.
+We have two visually nearly identical PDFs, however, the initial field is placed in a different spot for both of them even though the documents appear the same.
 
 ![The Problem](/static/theproblem.png)
 
